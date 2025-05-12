@@ -72,6 +72,37 @@ th {
 }
 /* Icon buttons */
 .icon-btn {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    min-height: 32px;
+    max-width: 32px;
+    max-height: 32px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    font-size: 18px;
+    background: #e8f3fc;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    transition: background 0.2s, color 0.2s, font-size 0.2s;
+    padding: 0;
+    vertical-align: middle;
+    text-align: center;
+    white-space: nowrap;
+}
+.icon-btn:active, .icon-btn:focus {
+    outline: none;
+    background: #d0e7fa;
+}
+.icon-btn.copied {
+    font-size: 12px !important;
+    color: #0a66c2 !important;
+}
+
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -289,7 +320,7 @@ def create_table_html(results, page=1):
                 table_html += f"<div class='linkedin-url'>{linkedin_url}</div>"
                 table_html += "<div class='button-container'>"
                 # Copy URL button
-                table_html += f"<button class='icon-btn icon-copy' data-text='{linkedin_url}' title='Copy LinkedIn URL'></button>"
+                table_html += f"<button class='icon-btn icon-copy copy-btn' data-text='{linkedin_url}' title='Copy LinkedIn URL'></button>"
                 # Open URL button
                 table_html += f"<a href='{linkedin_url}' target='_blank'><button class='icon-btn icon-link' title='Open LinkedIn Profile'></button></a>"
                 table_html += "</div>"
@@ -302,7 +333,7 @@ def create_table_html(results, page=1):
             if input_field:
                 table_html += f"<textarea class='message-textarea' readonly>{input_field}</textarea>"
                 table_html += "<div class='button-container'>"
-                table_html += f"<button class='icon-btn icon-copy' data-text='{input_field}' title='Copy Message'></button>"
+                table_html += f"<button class='icon-btn icon-copy copy-btn' data-text='{input_field}' title='Copy Message'></button>"
                 table_html += "</div>"
             else:
                 table_html += "-"
@@ -312,7 +343,16 @@ def create_table_html(results, page=1):
     
     table_html += "</tbody>"
     table_html += "</table>"
+    # Use inline onclick handler for copy
+    copy_inline = "onclick=\"navigator.clipboard.writeText(this.getAttribute('data-text')).then(() => { const orig = this.innerText; this.classList.add('copied'); this.innerText='Copied!'; setTimeout(()=>{this.innerText=orig; this.classList.remove('copied');},1500); });\""
+    # Patch the copy button HTMLs to include the inline handler
+    table_html = table_html.replace(
+        "><button class='icon-btn icon-copy copy-btn' ",
+        f"><button class='icon-btn icon-copy copy-btn' {copy_inline} "
+    )
     return table_html
+
+
 
 def get_results(page=1):
     """Get the current results from the job"""
@@ -424,47 +464,6 @@ def create_app():
                 
                 # Results display (using HTML instead of DataFrame)
                 results_html = gr.HTML("<div>No results yet</div>")
-        
-        # JavaScript for copy functionality
-        copy_js = """
-        <script>
-        // Function to copy text to clipboard
-        function copyToClipboard(element) {
-            const text = element.getAttribute('data-text');
-            navigator.clipboard.writeText(text).then(function() {
-                const originalText = element.innerText;
-                element.innerText = "Copied!";
-                setTimeout(function() {
-                    element.innerText = originalText;
-                }, 1500);
-            }).catch(function(err) {
-                console.error('Failed to copy: ', err);
-            });
-        }
-        
-        // Add event listeners to copy buttons
-        function setupCopyButtons() {
-            const copyButtons = document.querySelectorAll('.copy-btn');
-            copyButtons.forEach(function(button) {
-                button.addEventListener('click', function() {
-                    copyToClipboard(this);
-                });
-            });
-        }
-        
-        // Set up a mutation observer to handle dynamically added buttons
-        const observer = new MutationObserver(function(mutations) {
-            setupCopyButtons();
-        });
-        
-        // Start observing the document body for changes
-        document.addEventListener('DOMContentLoaded', function() {
-            setupCopyButtons();
-            observer.observe(document.body, { childList: true, subtree: true });
-        });
-        </script>
-        """
-        gr.HTML(copy_js)
         
         # Button click handlers
         start_button.click(
