@@ -343,12 +343,27 @@ def create_table_html(results, page=1):
     
     table_html += "</tbody>"
     table_html += "</table>"
-    # Use inline onclick handler for copy
-    copy_inline = "onclick=\"navigator.clipboard.writeText(this.getAttribute('data-text')).then(() => { const orig = this.innerText; this.classList.add('copied'); this.innerText='Copied!'; setTimeout(()=>{this.innerText=orig; this.classList.remove('copied');},1500); });\""
+    # Use inline onclick handler for copy with fallback
+    copy_inline = ("onclick=\"(async function(btn){"
+        "const text = btn.getAttribute('data-text');"
+        "try { await navigator.clipboard.writeText(text); }"
+        "catch (err) {"
+        "  var textarea = document.createElement('textarea');"
+        "  textarea.value = text;"
+        "  document.body.appendChild(textarea);"
+        "  textarea.select();"
+        "  try { document.execCommand('copy'); } catch(e) {}"
+        "  document.body.removeChild(textarea);"
+        "}"
+        "const orig = btn.innerText;"
+        "btn.classList.add('copied');"
+        "btn.innerText='Copied!';"
+        "setTimeout(()=>{btn.innerText=orig; btn.classList.remove('copied');},1500);"
+        "})(this)\"")
     # Patch the copy button HTMLs to include the inline handler
     table_html = table_html.replace(
-        "><button class='icon-btn icon-copy copy-btn' ",
-        f"><button class='icon-btn icon-copy copy-btn' {copy_inline} "
+        ">\u003cbutton class='icon-btn icon-copy copy-btn' ",
+        f">\u003cbutton class='icon-btn icon-copy copy-btn' {copy_inline} "
     )
     return table_html
 
