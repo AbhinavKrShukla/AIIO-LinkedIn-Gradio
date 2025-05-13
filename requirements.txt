@@ -1,0 +1,11 @@
+# Global requirements for all Python components in this project
+
+gradio
+requests
+pandas
+fastapi
+uvicorn
+pydantic
+python-dotenv
+logging
+threading

@@ -444,7 +444,7 @@ def on_next_click():
 def create_app():
     """Create the Gradio application"""
     with gr.Blocks(css=custom_css) as app:
-        gr.HTML("<h1>LinkedIn Campaign Lead Processor</h1>")
+        gr.HTML("<h1>LinkedIn Personalized Messages</h1>")
         
         with gr.Row():
             with gr.Column():
