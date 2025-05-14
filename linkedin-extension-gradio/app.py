@@ -428,7 +428,8 @@ def update_ui():
     # Create status HTML
     status_html = f"<div class='{status_class}'>{status_text}</div>"
     
-    return status_html, page_info, results_html
+    # Return the same page_info for both top and bottom pagination
+    return status_html, page_info, results_html, page_info
 
 def on_prev_click():
     """Handle previous page button click"""
@@ -471,14 +472,20 @@ def create_app():
                 # Status display
                 status_html = gr.HTML("<div class='status'>Click 'Start Processing' to begin</div>")
                 
-                # Pagination controls
+                # Top pagination controls
                 with gr.Row():
-                    prev_button = gr.Button("Previous Page")
+                    prev_button_top = gr.Button("Previous Page")
                     page_info = gr.HTML("Page 1")
-                    next_button = gr.Button("Next Page")
+                    next_button_top = gr.Button("Next Page")
                 
                 # Results display (using HTML instead of DataFrame)
                 results_html = gr.HTML("<div>No results yet</div>")
+                
+                # Bottom pagination controls
+                with gr.Row():
+                    prev_button_bottom = gr.Button("Previous Page")
+                    page_info_bottom = gr.HTML("Page 1")
+                    next_button_bottom = gr.Button("Next Page")
         
         # Button click handlers
         start_button.click(
@@ -488,25 +495,39 @@ def create_app():
         ).then(
             fn=update_ui,
             inputs=None,
-            outputs=[status_html, page_info, results_html]
+            outputs=[status_html, page_info, results_html, page_info_bottom]
         )
         
         refresh_button.click(
             fn=update_ui,
             inputs=None,
-            outputs=[status_html, page_info, results_html]
+            outputs=[status_html, page_info, results_html, page_info_bottom]
         )
         
-        prev_button.click(
+        # Top pagination buttons
+        prev_button_top.click(
             fn=on_prev_click,
             inputs=None,
-            outputs=[status_html, page_info, results_html]
+            outputs=[status_html, page_info, results_html, page_info_bottom]
         )
         
-        next_button.click(
+        next_button_top.click(
             fn=on_next_click,
             inputs=None,
-            outputs=[status_html, page_info, results_html]
+            outputs=[status_html, page_info, results_html, page_info_bottom]
+        )
+        
+        # Bottom pagination buttons
+        prev_button_bottom.click(
+            fn=on_prev_click,
+            inputs=None,
+            outputs=[status_html, page_info, results_html, page_info_bottom]
+        )
+        
+        next_button_bottom.click(
+            fn=on_next_click,
+            inputs=None,
+            outputs=[status_html, page_info, results_html, page_info_bottom]
         )
     
     return app
