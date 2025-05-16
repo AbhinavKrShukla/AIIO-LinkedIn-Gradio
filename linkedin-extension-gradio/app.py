@@ -457,6 +457,11 @@ def on_next_click():
     
     return update_ui()
 
+def download_csv():
+    """Function to return the CSV file for download"""
+    csv_path = "filtered_personalized_messages_theGo.csv"
+    return csv_path
+
 def create_app():
     """Create the Gradio application"""
     with gr.Blocks(css=custom_css, theme=gr.themes.Soft()) as app:
@@ -464,6 +469,13 @@ def create_app():
         
         with gr.Row():
             with gr.Column():
+                # Download button at the top left
+                download_button = gr.Button("📥 Download CSV", variant="primary", size="sm")
+                file_output = gr.File(visible=False)
+                download_button.click(fn=download_csv, inputs=None, outputs=file_output)
+                
+                # Add some space after the download button
+                gr.HTML("<div style='height: 10px;'></div>")
                 # Buttons
                 with gr.Row():
                     start_button = gr.Button("Start Processing", variant="primary")
